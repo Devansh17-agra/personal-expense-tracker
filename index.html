@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Expense Tracker</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dashboard Metrics */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .metric-title {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .remaining-positive { color: var(--success); }
+        .remaining-negative { color: var(--danger); }
+
+        /* Forms and Controls */
+        .grid-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        input, select {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        /* Filter Section */
+        .filter-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Expense List */
+        .expense-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            transition: transform 0.2s;
+        }
+
+        .expense-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .expense-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .expense-name {
+            font-weight: 600;
+        }
+
+        .expense-meta {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .expense-category {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #e0e7ff;
+            color: #4338ca;
+            margin-right: 0.5rem;
+        }
+
+        .expense-amount {
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        .right-side {
+            display: flex;
+            align-items: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            padding: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>💸 Personal Expense Tracker</h1>
+
+        <!-- Dashboard Metrics (Bonus Challenges) -->
+        <div class="card dashboard">
+            <div class="metric">
+                <div class="metric-title">Monthly Budget</div>
+                <input type="number" id="budgetInput" value="1000" min="0" style="width: 100%; text-align: center; font-weight: bold; font-size: 1.25rem; border: none; background: transparent; padding: 0;">
+            </div>
+            <div class="metric">
+                <div class="metric-title">Total Expenses</div>
+                <div class="metric-value" id="totalExpenses">$0.00</div>
+            </div>
+            <div class="metric">
+                <div class="metric-title">Remaining Balance</div>
+                <div class="metric-value remaining-positive" id="remainingBalance">$1000.00</div>
+            </div>
+            <div class="metric">
+                <div class="metric-title">Highest Expense</div>
+                <div class="metric-value" id="highestExpense" style="font-size: 1.1rem; color: var(--primary);">-</div>
+            </div>
+        </div>
+
+        <!-- Add Expense Form -->
+        <div class="card">
+            <form id="expenseForm" class="grid-form">
+                <div class="form-group">
+                    <label for="expenseName">Expense Name</label>
+                    <input type="text" id="expenseName" placeholder="e.g., Groceries" required>
+                </div>
+                <div class="form-group">
+                    <label for="expenseAmount">Amount ($)</label>
+                    <input type="number" id="expenseAmount" placeholder="0.00" step="0.01" min="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="expenseCategory">Category</label>
+                    <select id="expenseCategory" required>
+                        <option value="Food">Food</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+
+        <!-- Expense Display & Filter -->
+        <div class="card">
+            <div class="filter-container">
+                <h2>Expenses History</h2>
+                <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem;">
+                    <label for="filterCategory" style="white-space: nowrap;">Filter by:</label>
+                    <select id="filterCategory">
+                        <option value="All">All Categories</option>
+                        <option value="Food">Food</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <ul id="expenseList" class="expense-list">
+                <!-- Dynamically populated -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        let budget = parseFloat(localStorage.getItem('budget')) || 1000;
+
+        // --- DOM Elements ---
+        const expenseForm = document.getElementById('expenseForm');
+        const expenseName = document.getElementById('expenseName');
+        const expenseAmount = document.getElementById('expenseAmount');
+        const expenseCategory = document.getElementById('expenseCategory');
+        const expenseList = document.getElementById('expenseList');
+        
+        const budgetInput = document.getElementById('budgetInput');
+        const totalExpensesEl = document.getElementById('totalExpenses');
+        const remainingBalanceEl = document.getElementById('remainingBalance');
+        const highestExpenseEl = document.getElementById('highestExpense');
+        const filterCategory = document.getElementById('filterCategory');
+
+        // --- Core Functions ---
+
+        // Render UI metrics and list items
+        function updateUI() {
+            const filteredCategory = filterCategory.value;
+            
+            // Filter expenses based on dropdown selection
+            const displayedExpenses = filteredCategory === 'All' 
+                ? expenses 
